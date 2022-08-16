@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner;
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -30,12 +31,14 @@ import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CameraActivity extends AppCompatActivity {
     private PreviewView previewView;
+    private OverlayView overlayView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ExecutorService exec;
     private Camera camera;
@@ -45,6 +48,7 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
+        overlayView = findViewById(R.id.overlayView);
         exec = Executors.newSingleThreadExecutor();
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(new Runnable() {
@@ -94,6 +98,7 @@ public class CameraActivity extends AppCompatActivity {
                         if (results.length>0) {
                             DetectedQuadResult result = results[0];
                             Log.d("DDN","confidence: "+result.confidenceAsDocumentBoundary);
+                            overlayView.setPoints(result.location.points);
                         }
                     }
                 } catch (DocumentNormalizerException e) {
