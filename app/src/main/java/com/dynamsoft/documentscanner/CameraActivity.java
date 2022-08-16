@@ -20,6 +20,8 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.dynamsoft.core.CoreException;
 import com.dynamsoft.core.ImageData;
@@ -47,6 +49,10 @@ public class CameraActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         previewView = findViewById(R.id.previewView);
         overlayView = findViewById(R.id.overlayView);
         exec = Executors.newSingleThreadExecutor();
