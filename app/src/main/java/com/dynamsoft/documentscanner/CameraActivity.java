@@ -126,20 +126,4 @@ public class CameraActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-    private ImageData getImageDataFromImageProxy(ImageProxy image){
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-        int nRowStride = image.getPlanes()[0].getRowStride();
-        int nPixelStride = image.getPlanes()[0].getPixelStride();
-        int length = buffer.remaining();
-        byte[] bytes = new byte[length];
-        buffer.get(bytes);
-        ImageData imageData = new ImageData();
-        imageData.width = image.getWidth();
-        imageData.height = image.getHeight();
-        imageData.format = image.getFormat();
-        imageData.stride = nPixelStride*nRowStride;
-        imageData.orientation = image.getImageInfo().getRotationDegrees();
-        return imageData;
-    }
 }
