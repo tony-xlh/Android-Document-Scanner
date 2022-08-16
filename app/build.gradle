@@ -28,7 +28,16 @@ android {
 }
 
 dependencies {
+    //Dynamsoft products
     implementation 'com.dynamsoft:dynamsoftdocumentnormalizer:1.0.0'
+
+    //CameraX
+    def camerax_version = '1.1.0-rc01'
+    implementation "androidx.camera:camera-core:$camerax_version"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+    implementation "androidx.camera:camera-view:$camerax_version"
+
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
