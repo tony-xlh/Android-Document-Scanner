@@ -9,12 +9,15 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 
 
 public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
 
+    private int srcImageWidth = 0;
+    private int srcImageHeight = 0;
     private SurfaceHolder surfaceHolder = null;
     private Point[] points = null;
     private Paint stroke = new Paint();
@@ -66,11 +69,22 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
         drawPolygon();
     }
 
+    public void setSrcImageWidth(int width) {
+        srcImageWidth = width;
+    }
+
+    public void setSrcImageHeight(int height) {
+        srcImageHeight = height;
+    }
+
     public void drawPolygon()
     {
         try {
             // Get and lock canvas object from surfaceHolder.
             Canvas canvas = surfaceHolder.lockCanvas();
+            if (srcImageWidth != 0 && srcImageHeight != 0) {
+                convertPoints(canvas.getWidth(),canvas.getHeight());
+            }
             // Clear canvas
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             for (int index = 0; index <= points.length - 1; index++) {
@@ -85,6 +99,15 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
             surfaceHolder.unlockCanvasAndPost(canvas);
         }catch(Exception e){
             e.printStackTrace();
+        }
+    }
+
+    private void convertPoints(int canvasWidth, int canvasHeight){
+        double ratioX = ((double) canvasWidth)/srcImageWidth;
+        double ratioY = ((double) canvasHeight)/srcImageHeight;
+        for (int index = 0; index <= points.length - 1; index++) {
+            points[index].x = (int) (ratioX * points[index].x);
+            points[index].y = (int) (ratioY * points[index].y);
         }
     }
 

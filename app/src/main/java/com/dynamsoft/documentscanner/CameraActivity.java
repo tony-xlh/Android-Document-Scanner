@@ -92,6 +92,8 @@ public class CameraActivity extends AppCompatActivity {
             public void analyze(@NonNull ImageProxy image) {
                 @SuppressLint("UnsafeOptInUsageError")
                 Bitmap bitmap = BitmapUtils.getBitmap(image);
+                overlayView.setSrcImageWidth(bitmap.getWidth());
+                overlayView.setSrcImageHeight(bitmap.getHeight());
                 try {
                     DetectedQuadResult[] results = ddn.detectQuad(bitmap);
                     if (results != null) {
