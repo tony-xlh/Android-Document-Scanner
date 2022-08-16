@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -85,11 +86,15 @@ public class CameraActivity extends AppCompatActivity {
         imageAnalysis.setAnalyzer(exec, new ImageAnalysis.Analyzer() {
             @Override
             public void analyze(@NonNull ImageProxy image) {
-                ImageData imageData = getImageDataFromImageProxy(image);
+                @SuppressLint("UnsafeOptInUsageError")
+                Bitmap bitmap = BitmapUtils.getBitmap(image);
                 try {
-                    DetectedQuadResult[] results = ddn.detectQuad(imageData);
-                    for (DetectedQuadResult result:results) {
-                        Log.d("DDN","confidence: "+result.confidenceAsDocumentBoundary);
+                    DetectedQuadResult[] results = ddn.detectQuad(bitmap);
+                    if (results != null) {
+                        if (results.length>0) {
+                            DetectedQuadResult result = results[0];
+                            Log.d("DDN","confidence: "+result.confidenceAsDocumentBoundary);
+                        }
                     }
                 } catch (DocumentNormalizerException e) {
                     e.printStackTrace();
@@ -128,7 +133,7 @@ public class CameraActivity extends AppCompatActivity {
         imageData.width = image.getWidth();
         imageData.height = image.getHeight();
         imageData.format = image.getFormat();
-        imageData.stride = nPixelStride*nPixelStride;
+        imageData.stride = nPixelStride*nRowStride;
         imageData.orientation = image.getImageInfo().getRotationDegrees();
         return imageData;
     }
