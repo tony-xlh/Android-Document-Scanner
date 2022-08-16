@@ -16,10 +16,19 @@ import androidx.lifecycle.LifecycleOwner;
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Size;
 
+import com.dynamsoft.core.CoreException;
+import com.dynamsoft.core.ImageData;
+import com.dynamsoft.core.LicenseManager;
+import com.dynamsoft.core.LicenseVerificationListener;
+import com.dynamsoft.ddn.DetectedQuadResult;
+import com.dynamsoft.ddn.DocumentNormalizer;
+import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +38,7 @@ public class CameraActivity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ExecutorService exec;
     private Camera camera;
+    private DocumentNormalizer ddn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +57,7 @@ public class CameraActivity extends AppCompatActivity {
                 }
             }
         }, ContextCompat.getMainExecutor(this));
+        initDDN();
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -74,6 +85,15 @@ public class CameraActivity extends AppCompatActivity {
         imageAnalysis.setAnalyzer(exec, new ImageAnalysis.Analyzer() {
             @Override
             public void analyze(@NonNull ImageProxy image) {
+                ImageData imageData = getImageDataFromImageProxy(image);
+                try {
+                    DetectedQuadResult[] results = ddn.detectQuad(imageData);
+                    for (DetectedQuadResult result:results) {
+                        Log.d("DDN","confidence: "+result.confidenceAsDocumentBoundary);
+                    }
+                } catch (DocumentNormalizerException e) {
+                    e.printStackTrace();
+                }
                 image.close();
             }
         });
@@ -87,5 +107,29 @@ public class CameraActivity extends AppCompatActivity {
                 .addUseCase(imageAnalysis)
                 .build();
         camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, useCaseGroup);
+    }
+
+    private void initDDN(){
+        try {
+            ddn = new DocumentNormalizer();
+        } catch (DocumentNormalizerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ImageData getImageDataFromImageProxy(ImageProxy image){
+        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+        int nRowStride = image.getPlanes()[0].getRowStride();
+        int nPixelStride = image.getPlanes()[0].getPixelStride();
+        int length = buffer.remaining();
+        byte[] bytes = new byte[length];
+        buffer.get(bytes);
+        ImageData imageData = new ImageData();
+        imageData.width = image.getWidth();
+        imageData.height = image.getHeight();
+        imageData.format = image.getFormat();
+        imageData.stride = nPixelStride*nPixelStride;
+        imageData.orientation = image.getImageInfo().getRotationDegrees();
+        return imageData;
     }
 }

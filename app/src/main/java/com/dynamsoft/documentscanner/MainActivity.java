@@ -8,9 +8,14 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.dynamsoft.core.CoreException;
+import com.dynamsoft.core.LicenseManager;
+import com.dynamsoft.core.LicenseVerificationListener;
 
 public class MainActivity extends AppCompatActivity {
     private Button startScanButton;
@@ -28,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 requestPermission();
             }
         });
+        initDynamsoftLicense();
     }
 
     private boolean hasCameraPermission() {
@@ -63,5 +69,18 @@ public class MainActivity extends AppCompatActivity {
     private void startScan(){
         Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
+    }
+
+    private void initDynamsoftLicense(){
+        LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTAwMjI3NzYzLVRYbE5iMkpwYkdWUWNtOXFYMlJrYmciLCJvcmdhbml6YXRpb25JRCI6IjEwMDIyNzc2MyIsImNoZWNrQ29kZSI6MTM0ODY2MDUyMn0=", MainActivity.this, new LicenseVerificationListener() {
+            @Override
+            public void licenseVerificationCallback(boolean isSuccess, CoreException error) {
+                if(!isSuccess){
+                    error.printStackTrace();
+                }else{
+                    Log.d("DDN","license valid");
+                }
+            }
+        });
     }
 }
