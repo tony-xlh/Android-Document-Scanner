@@ -1,7 +1,13 @@
 package com.dynamsoft.documentscanner;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.RandomAccessFile;
 
 public class Utils {
 
@@ -40,6 +46,37 @@ public class Utils {
             bottom = Math.max(point.y,bottom);
         }
         return new Rect(left,top,right,bottom);
+    }
+
+    public static Bitmap bitmapFromFile(File file){
+        byte[] b = readFile(file);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+        return bitmap;
+    }
+
+    public static byte[] readFile(File file) {
+        RandomAccessFile rf = null;
+        byte[] data = null;
+        try {
+            rf = new RandomAccessFile(file, "r");
+            data = new byte[(int) rf.length()];
+            rf.readFully(data);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        } finally {
+            closeQuietly(rf);
+        }
+        return data;
+    }
+
+    public static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 
 }

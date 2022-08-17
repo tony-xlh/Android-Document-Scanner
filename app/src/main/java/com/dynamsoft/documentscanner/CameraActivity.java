@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -182,6 +183,9 @@ public class CameraActivity extends AppCompatActivity {
                     public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
                         Log.d("DDN","saved");
                         Log.d("DDN",outputFileResults.getSavedUri().toString());
+                        Intent intent = new Intent(CameraActivity.this, CroppingActivity.class);
+                        intent.putExtra("imageUri",outputFileResults.getSavedUri().toString());
+                        startActivity(intent);
                     }
 
                     @Override
