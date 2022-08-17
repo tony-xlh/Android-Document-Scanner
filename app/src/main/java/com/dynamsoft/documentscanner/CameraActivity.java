@@ -1,10 +1,13 @@
 package com.dynamsoft.documentscanner;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.UseCaseGroup;
@@ -17,9 +20,11 @@ import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -32,6 +37,7 @@ import com.dynamsoft.ddn.DocumentNormalizer;
 import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -45,6 +51,8 @@ public class CameraActivity extends AppCompatActivity {
     private ExecutorService exec;
     private Camera camera;
     private DocumentNormalizer ddn;
+    private ImageCapture imageCapture;
+    private Boolean taken = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +70,7 @@ public class CameraActivity extends AppCompatActivity {
             public void run() {
                 try {
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                    bindPreviewAndImageAnalysis(cameraProvider);
+                    bindUseCases(cameraProvider);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -72,7 +80,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
-    private void bindPreviewAndImageAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
+    private void bindUseCases(@NonNull ProcessCameraProvider cameraProvider) {
 
         int orientation = getApplicationContext().getResources().getConfiguration().orientation;
         Size resolution;
@@ -107,6 +115,12 @@ public class CameraActivity extends AppCompatActivity {
                             DetectedQuadResult result = results[0];
                             Log.d("DDN","confidence: "+result.confidenceAsDocumentBoundary);
                             overlayView.setPoints(result.location.points);
+                            if (result.confidenceAsDocumentBoundary > 50) {
+                                if (taken == false) {
+                                    takePhoto();
+                                    taken = true;
+                                }
+                            }
                         }
                     }
                 } catch (DocumentNormalizerException e) {
@@ -119,12 +133,37 @@ public class CameraActivity extends AppCompatActivity {
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
+        imageCapture =
+                new ImageCapture.Builder()
+                        .build();
         UseCaseGroup useCaseGroup = new UseCaseGroup.Builder()
                 .addUseCase(preview)
                 .addUseCase(imageAnalysis)
+                .addUseCase(imageCapture)
                 .build();
         camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, useCaseGroup);
+    }
+
+    private void takePhoto(){
+        File dir = getExternalCacheDir();
+        File file = new File(dir, "photo.jpg");
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(file).build();
+        imageCapture.takePicture(outputFileOptions, exec,
+                new ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
+                        Log.d("DDN","saved");
+                        Log.d("DDN",outputFileResults.getSavedUri().toString());
+                    }
+
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+
+                    }
+
+                }
+        );
     }
 
     private void initDDN(){
