@@ -3,6 +3,7 @@ package com.dynamsoft.documentscanner;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.AspectRatio;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
@@ -91,7 +92,7 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         Preview.Builder previewBuilder = new Preview.Builder();
-        previewBuilder.setTargetResolution(resolution);
+        previewBuilder.setTargetAspectRatio(AspectRatio.RATIO_16_9);
         Preview preview = previewBuilder.build();
 
         ImageAnalysis.Builder imageAnalysisBuilder = new ImageAnalysis.Builder();
@@ -135,6 +136,7 @@ public class CameraActivity extends AppCompatActivity {
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
         imageCapture =
                 new ImageCapture.Builder()
+                        .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                         .build();
         UseCaseGroup useCaseGroup = new UseCaseGroup.Builder()
                 .addUseCase(preview)
