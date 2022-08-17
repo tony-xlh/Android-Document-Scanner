@@ -54,6 +54,7 @@ public class CameraActivity extends AppCompatActivity {
     private DocumentNormalizer ddn;
     private ImageCapture imageCapture;
     private Boolean taken = false;
+    private ArrayList<DetectedQuadResult> previousResults = new ArrayList<DetectedQuadResult>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +119,18 @@ public class CameraActivity extends AppCompatActivity {
                             overlayView.setPoints(result.location.points);
                             if (result.confidenceAsDocumentBoundary > 50) {
                                 if (taken == false) {
-                                    takePhoto();
-                                    taken = true;
+                                    if (previousResults.size() == 3) {
+                                        if (steady() == true) {
+                                            Log.d("DDN","take photo");
+                                            takePhoto();
+                                            taken = true;
+                                        }else{
+                                            previousResults.remove(0);
+                                            previousResults.add(result);
+                                        }
+                                    }else{
+                                        previousResults.add(result);
+                                    }
                                 }
                             }
                         }
@@ -144,6 +155,20 @@ public class CameraActivity extends AppCompatActivity {
                 .addUseCase(imageCapture)
                 .build();
         camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, useCaseGroup);
+    }
+
+    private Boolean steady(){
+        float iou1 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(1).location.points);
+        float iou2 = Utils.intersectionOverUnion(previousResults.get(1).location.points,previousResults.get(2).location.points);
+        float iou3 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(1).location.points);
+        Log.d("DDN","iou1: "+iou1);
+        Log.d("DDN","iou2: "+iou2);
+        Log.d("DDN","iou3: "+iou3);
+        if (iou1>0.9 && iou2>0.9 && iou3>0.9) {
+            return true;
+        }else{
+            return false;
+        }
     }
 
     private void takePhoto(){
