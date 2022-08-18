@@ -29,6 +29,10 @@ public class CroppingActivity extends AppCompatActivity {
     private Button rotateButton;
     private ImageView imageView;
     private ImageView polygonImageView;
+    private ImageView corner1;
+    private ImageView corner2;
+    private ImageView corner3;
+    private ImageView corner4;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
