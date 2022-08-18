@@ -34,6 +34,7 @@ import com.dynamsoft.core.CoreException;
 import com.dynamsoft.core.ImageData;
 import com.dynamsoft.core.LicenseManager;
 import com.dynamsoft.core.LicenseVerificationListener;
+import com.dynamsoft.core.Quadrilateral;
 import com.dynamsoft.ddn.DetectedQuadResult;
 import com.dynamsoft.ddn.DocumentNormalizer;
 import com.dynamsoft.ddn.DocumentNormalizerException;
@@ -113,6 +114,7 @@ public class CameraActivity extends AppCompatActivity {
                 overlayView.setSrcImageHeight(bitmap.getHeight());
                 try {
                     DetectedQuadResult[] results = ddn.detectQuad(bitmap);
+
                     if (results != null) {
                         if (results.length>0) {
                             DetectedQuadResult result = results[0];
@@ -123,7 +125,7 @@ public class CameraActivity extends AppCompatActivity {
                                     if (previousResults.size() == 3) {
                                         if (steady() == true) {
                                             Log.d("DDN","take photo");
-                                            takePhoto();
+                                            takePhoto(result);
                                             taken = true;
                                         }else{
                                             previousResults.remove(0);
@@ -172,7 +174,7 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    private void takePhoto(){
+    private void takePhoto(DetectedQuadResult result){
         File dir = getExternalCacheDir();
         File file = new File(dir, "photo.jpg");
         ImageCapture.OutputFileOptions outputFileOptions =
@@ -185,6 +187,7 @@ public class CameraActivity extends AppCompatActivity {
                         Log.d("DDN",outputFileResults.getSavedUri().toString());
                         Intent intent = new Intent(CameraActivity.this, CroppingActivity.class);
                         intent.putExtra("imageUri",outputFileResults.getSavedUri().toString());
+                        intent.putExtra("points",result.location.points);
                         startActivity(intent);
                     }
 

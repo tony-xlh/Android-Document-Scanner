@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -45,6 +48,12 @@ public class CroppingActivity extends AppCompatActivity {
     private void loadImage(){
         try {
             Uri uri = Uri.parse(getIntent().getStringExtra("imageUri"));
+            Parcelable[] parcelables = getIntent().getParcelableArrayExtra("points");
+            Point[] points = new Point[parcelables.length];
+            for (int i = 0; i < parcelables.length; i++) {
+                points[i] = (Point) parcelables[i];
+            }
+            Log.d("DDN",points.toString());
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
             imageView.setImageBitmap(bitmap);
         } catch (Exception e) {
