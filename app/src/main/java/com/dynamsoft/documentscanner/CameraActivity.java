@@ -125,7 +125,8 @@ public class CameraActivity extends AppCompatActivity {
                                     if (previousResults.size() == 3) {
                                         if (steady() == true) {
                                             Log.d("DDN","take photo");
-                                            takePhoto(result);
+                                            takePhoto(result, bitmap.getWidth(), bitmap.getHeight());
+                                            imageAnalysis.clearAnalyzer();
                                             taken = true;
                                         }else{
                                             previousResults.remove(0);
@@ -174,7 +175,7 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    private void takePhoto(DetectedQuadResult result){
+    private void takePhoto(DetectedQuadResult result,int bitmapWidth,int bitmapHeight){
         File dir = getExternalCacheDir();
         File file = new File(dir, "photo.jpg");
         ImageCapture.OutputFileOptions outputFileOptions =
@@ -188,6 +189,8 @@ public class CameraActivity extends AppCompatActivity {
                         Intent intent = new Intent(CameraActivity.this, CroppingActivity.class);
                         intent.putExtra("imageUri",outputFileResults.getSavedUri().toString());
                         intent.putExtra("points",result.location.points);
+                        intent.putExtra("bitmapWidth",bitmapWidth);
+                        intent.putExtra("bitmapHeight",bitmapHeight);
                         startActivity(intent);
                     }
 
