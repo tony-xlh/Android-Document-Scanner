@@ -96,35 +96,31 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void drawPolygon()
     {
-        try {
-            Log.d("DDN","draw polygon");
-            // Get and lock canvas object from surfaceHolder.
-            Canvas canvas = surfaceHolder.lockCanvas();
-            if (canvas == null) {
-                Log.d("DDN","canvas is null");
-                return;
-            }
-            Point[] pts;
-            if (srcImageWidth != 0 && srcImageHeight != 0) {
-                pts = convertPoints(canvas.getWidth(),canvas.getHeight());
-            }else{
-                pts = points;
-            }
-            // Clear canvas
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            for (int index = 0; index <= pts.length - 1; index++) {
-                if (index == pts.length - 1) {
-                    canvas.drawLine(pts[index].x,pts[index].y,pts[0].x,pts[0].y,stroke);
-                }else{
-                    canvas.drawLine(pts[index].x,pts[index].y,pts[index+1].x,pts[index+1].y,stroke);
-                }
-            }
-
-            // Unlock the canvas object and post the new draw.
-            surfaceHolder.unlockCanvasAndPost(canvas);
-        }catch(Exception e){
-            e.printStackTrace();
+        Log.d("DDN","draw polygon");
+        // Get and lock canvas object from surfaceHolder.
+        Canvas canvas = surfaceHolder.lockCanvas();
+        if (canvas == null) {
+            Log.d("DDN","canvas is null");
+            return;
         }
+        Point[] pts;
+        if (srcImageWidth != 0 && srcImageHeight != 0) {
+            pts = convertPoints(canvas.getWidth(),canvas.getHeight());
+        }else{
+            pts = points;
+        }
+        // Clear canvas
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        for (int index = 0; index <= pts.length - 1; index++) {
+            if (index == pts.length - 1) {
+                canvas.drawLine(pts[index].x,pts[index].y,pts[0].x,pts[0].y,stroke);
+            }else{
+                canvas.drawLine(pts[index].x,pts[index].y,pts[index+1].x,pts[index+1].y,stroke);
+            }
+        }
+
+        // Unlock the canvas object and post the new draw.
+        surfaceHolder.unlockCanvasAndPost(canvas);
     }
 
     public Point[] convertPoints(int canvasWidth, int canvasHeight){
