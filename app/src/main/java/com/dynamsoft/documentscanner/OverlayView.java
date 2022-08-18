@@ -118,6 +118,7 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
                 canvas.drawLine(pts[index].x,pts[index].y,pts[index+1].x,pts[index+1].y,stroke);
             }
         }
+        
 
         // Unlock the canvas object and post the new draw.
         surfaceHolder.unlockCanvasAndPost(canvas);
