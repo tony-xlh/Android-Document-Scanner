@@ -43,7 +43,10 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-
+        Log.d("DDN","surface created");
+        if (points != null) {
+            drawPolygon();
+        }
     }
 
     @Override
@@ -56,8 +59,15 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
 
     }
 
+    public SurfaceHolder getSurfaceHolder(){
+        return surfaceHolder;
+    }
+
     public void setStroke(Paint paint){
         stroke = paint;
+    }
+    public Paint getStroke(){
+        return stroke;
     }
 
     public Point[] getPoints(){
@@ -76,25 +86,37 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
     public void setSrcImageHeight(int height) {
         srcImageHeight = height;
     }
+    public int getSrcImageWidth() {
+        return srcImageWidth;
+    }
+
+    public int getSrcImageHeight() {
+        return srcImageHeight;
+    }
 
     public void drawPolygon()
     {
         try {
+            Log.d("DDN","draw polygon");
             // Get and lock canvas object from surfaceHolder.
             Canvas canvas = surfaceHolder.lockCanvas();
             if (canvas == null) {
+                Log.d("DDN","canvas is null");
                 return;
             }
+            Point[] pts;
             if (srcImageWidth != 0 && srcImageHeight != 0) {
-                convertPoints(canvas.getWidth(),canvas.getHeight());
+                pts = convertPoints(canvas.getWidth(),canvas.getHeight());
+            }else{
+                pts = points;
             }
             // Clear canvas
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            for (int index = 0; index <= points.length - 1; index++) {
-                if (index == points.length - 1) {
-                    canvas.drawLine(points[index].x,points[index].y,points[0].x,points[0].y,stroke);
+            for (int index = 0; index <= pts.length - 1; index++) {
+                if (index == pts.length - 1) {
+                    canvas.drawLine(pts[index].x,pts[index].y,pts[0].x,pts[0].y,stroke);
                 }else{
-                    canvas.drawLine(points[index].x,points[index].y,points[index+1].x,points[index+1].y,stroke);
+                    canvas.drawLine(pts[index].x,pts[index].y,pts[index+1].x,pts[index+1].y,stroke);
                 }
             }
 
@@ -105,13 +127,17 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    private void convertPoints(int canvasWidth, int canvasHeight){
+    public Point[] convertPoints(int canvasWidth, int canvasHeight){
+        Point[] newPoints = new Point[points.length];
         double ratioX = ((double) canvasWidth)/srcImageWidth;
         double ratioY = ((double) canvasHeight)/srcImageHeight;
         for (int index = 0; index <= points.length - 1; index++) {
-            points[index].x = (int) (ratioX * points[index].x);
-            points[index].y = (int) (ratioY * points[index].y);
+            Point p = new Point();
+            p.x = (int) (ratioX * points[index].x);
+            p.y = (int) (ratioY * points[index].y);
+            newPoints[index] = p;
         }
+        return newPoints;
     }
 
 }
