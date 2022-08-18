@@ -82,6 +82,9 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
         try {
             // Get and lock canvas object from surfaceHolder.
             Canvas canvas = surfaceHolder.lockCanvas();
+            if (canvas == null) {
+                return;
+            }
             if (srcImageWidth != 0 && srcImageHeight != 0) {
                 convertPoints(canvas.getWidth(),canvas.getHeight());
             }
