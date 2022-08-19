@@ -16,15 +16,17 @@ import android.view.SurfaceHolder;
 
 public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
 
-    private int srcImageWidth = 0;
-    private int srcImageHeight = 0;
+    private int srcImageWidth;
+    private int srcImageHeight;
     private SurfaceHolder surfaceHolder = null;
     private Point[] points = null;
     private Paint stroke = new Paint();
     public OverlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setFocusable(true);
-
+        Log.d("DDN","initialize overlay view");
+        srcImageWidth = 0;
+        srcImageHeight = 0;
         if(surfaceHolder == null) {
             // Get surfaceHolder object.
             surfaceHolder = getHolder();
@@ -79,13 +81,23 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
         drawPolygon();
     }
 
+    public void setPointsAndImageGeometry(Point[] points, int width,int height){
+        this.srcImageWidth = width;
+        this.srcImageHeight = height;
+        this.points = points;
+        drawPolygon();
+    }
+
     public void setSrcImageWidth(int width) {
-        srcImageWidth = width;
+        Log.d("DDN","set image width: "+width);
+        this.srcImageWidth = width;
     }
 
     public void setSrcImageHeight(int height) {
-        srcImageHeight = height;
+        Log.d("DDN","set image height: "+height);
+        this.srcImageHeight = height;
     }
+
     public int getSrcImageWidth() {
         return srcImageWidth;
     }
@@ -104,7 +116,9 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
             return;
         }
         Point[] pts;
+        Log.d("DDN","srcImageHeight: "+srcImageHeight);
         if (srcImageWidth != 0 && srcImageHeight != 0) {
+            Log.d("DDN","convert points");
             pts = convertPoints(canvas.getWidth(),canvas.getHeight());
         }else{
             pts = points;
@@ -118,7 +132,6 @@ public class OverlayView extends SurfaceView implements SurfaceHolder.Callback {
                 canvas.drawLine(pts[index].x,pts[index].y,pts[index+1].x,pts[index+1].y,stroke);
             }
         }
-        
 
         // Unlock the canvas object and post the new draw.
         surfaceHolder.unlockCanvasAndPost(canvas);

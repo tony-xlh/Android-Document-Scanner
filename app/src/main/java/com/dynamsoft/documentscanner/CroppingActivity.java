@@ -14,6 +14,8 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -27,8 +29,9 @@ public class CroppingActivity extends AppCompatActivity {
     private Button cancelButton;
     private Button saveButton;
     private Button rotateButton;
+    private Bitmap background;
     private ImageView imageView;
-    private ImageView polygonImageView;
+    private OverlayView overlayView;
     private ImageView corner1;
     private ImageView corner2;
     private ImageView corner3;
@@ -37,8 +40,12 @@ public class CroppingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cropping);
+        getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         imageView = findViewById(R.id.imageView);
-        polygonImageView = findViewById(R.id.polygonImageView);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        overlayView = findViewById(R.id.cropOverlayView);
         cancelButton = findViewById(R.id.cancelButton);
         cancelButton = findViewById(R.id.cancelButton);
         cancelButton.setOnClickListener(v -> {
@@ -51,6 +58,13 @@ public class CroppingActivity extends AppCompatActivity {
         rotateButton = findViewById(R.id.rotateButton);
         rotateButton.setOnClickListener(v -> {
 
+        });
+
+        imageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                //updateOverlayViewLayout();
+            }
         });
         loadImage();
     }
@@ -66,28 +80,31 @@ public class CroppingActivity extends AppCompatActivity {
 
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
             imageView.setImageBitmap(bitmap);
-            drawOverlay(getIntent().getIntExtra("bitmapWidth",720),
-                        getIntent().getIntExtra("bitmapHeight",1280),
-                        points);
+            background = bitmap;
+            int bitmapWidth = getIntent().getIntExtra("bitmapWidth",720);
+            int bitmapHeight = getIntent().getIntExtra("bitmapHeight",1280);
+            drawOverlay(bitmapWidth,bitmapHeight,points);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void drawOverlay(int width,int height,Point[] pts){
-        Bitmap bm = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
-        Paint stroke = new Paint();
-        stroke.setColor(Color.GREEN);
-        Canvas canvas = new Canvas(bm);
-        for (int index = 0; index <= pts.length - 1; index++) {
-            if (index == pts.length - 1) {
-                canvas.drawLine(pts[index].x,pts[index].y,pts[0].x,pts[0].y,stroke);
-            }else{
-                canvas.drawLine(pts[index].x,pts[index].y,pts[index+1].x,pts[index+1].y,stroke);
-            }
-        }
-        polygonImageView.setImageBitmap(bm);
+        Log.d("DDN","image width: "+width);
+        Log.d("DDN","image height: "+height);
+        overlayView.setPointsAndImageGeometry(pts,width,height);
     }
 
+    private void updateOverlayViewLayout(){
+        Bitmap bm = background;
+        Log.d("DDN","image width: "+imageView.getWidth());
+        Log.d("DDN","image height: "+imageView.getHeight());
+        double ratioView = ((double) imageView.getWidth())/imageView.getHeight();
+        double ratioImage = ((double) bm.getWidth())/bm.getHeight();
+        double offsetX = (ratioImage*bm.getWidth()-bm.getHeight())/2;
+        Log.d("DDN","ratioImage: "+ratioImage);
+        Log.d("DDN","offsetX: "+offsetX);
+        overlayView.setX((float) offsetX);
+    }
 
 }
