@@ -1,0 +1,97 @@
+{
+  "GlobalParameter":{
+    "Name":"GP",
+    "MaxTotalImageDimension":0
+  },
+  "ImageParameterArray":[
+    {
+      "Name":"IP-1",
+      "RegionPredetectionModes":[
+        {
+          "Mode": "RPM_GENERAL"
+        }
+      ],
+      "Timeout": 10000,
+      "ColourChannelUsageType": "CCUT_AUTO",
+      "MaxThreadCount": 4,
+      "ScaleDownThreshold": 2300,
+      "ColourConversionModes":[
+        {
+          "Mode": "CICM_GENERAL",
+          "BlueChannelWeight": -1,
+          "GreenChannelWeight": -1,
+          "RedChannelWeight": -1
+        }
+      ],
+      "GrayscaleTransformationModes":[
+        {
+          "Mode": "GTM_ORIGINAL"
+        }
+      ],
+      "GrayscaleEnhancementModes": [
+        {
+          "Mode": "GEM_GENERAL"
+        }
+      ],
+      "BinarizationModes":[
+        {
+          "Mode": "BM_LOCAL_BLOCK",
+          "BlockSizeX": 0,
+          "BlockSizeY": 0,
+          "EnableFillBinaryVacancy": 0,
+          "MorphOperation": "Close",
+          "MorphShape": "Rectangle",
+          "MorphOperationKernelSizeX": -1,
+          "MorphOperationKernelSizeY": -1,
+          "ThresholdCompensation": 10
+        }
+      ],
+      "TextureDetectionModes":[
+        {
+          "Mode": "TDM_GENERAL_WIDTH_CONCENTRATION",
+          "Sensitivity": 5
+        }
+      ],
+      "TextFilterModes": [
+        {
+          "Mode": "TFM_GENERAL_CONTOUR",
+          "IfEraseTextZone": 0,
+          "MinImageDimension": 65536,
+          "Sensitivity": 0
+        }
+      ],
+      "LineExtractionModes": [
+        {
+          "Mode": "LEM_GENERAL"
+        }
+      ],
+      "NormalizerParameterName":"NP-1",
+      "BaseImageParameterName":""
+    }
+  ],
+  "NormalizerParameterArray":[
+    {
+      "Name":"NP-1",
+      "ContentType": "CT_DOCUMENT",
+      "InteriorAngleRangeArray": [
+        {
+          "MinValue": 70,
+          "MaxValue": 110
+        }
+      ],
+      "QuadrilateralDetectionModes": [
+        {
+          "Mode": "QDM_GENERAL"
+        }
+      ],
+      "DeskewMode": {
+        "Mode": "DM_PERSPECTIVE_CORRECTION",
+        "ContentDirection": 0
+      },
+      "PageSize": [-1, -1],
+      "ColourMode": "ICM_GRAYSCALE",
+      "Brightness": 0,
+      "Contrast": 0
+    }
+  ]
+}
