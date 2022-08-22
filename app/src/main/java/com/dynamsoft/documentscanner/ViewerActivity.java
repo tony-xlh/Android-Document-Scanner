@@ -2,6 +2,7 @@ package com.dynamsoft.documentscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.dynamsoft.ddn.NormalizedImageResult;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ViewerActivity extends AppCompatActivity {
 
@@ -64,5 +66,25 @@ public class ViewerActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void updateSettings(){
+
+    }
+
+    private String readTemplate(int id){
+        Resources resources = this.getResources();
+        InputStream is=resources.openRawResource(id);
+        byte[] buffer;
+        try {
+            buffer = new byte[is.available()];
+            is.read(buffer);
+            String content = new String(buffer);
+            return content;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
 
 }
