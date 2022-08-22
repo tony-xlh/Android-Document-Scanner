@@ -82,18 +82,11 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/cancelButton"
+            android:id="@+id/reTakeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
-
-        <Button
-            android:id="@+id/rotateButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Rotate" />
+            android:text="Retake" />
 
         <Button
             android:id="@+id/saveButton"

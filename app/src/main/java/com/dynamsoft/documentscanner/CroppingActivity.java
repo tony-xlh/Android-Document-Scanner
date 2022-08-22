@@ -29,9 +29,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 public class CroppingActivity extends AppCompatActivity {
-    private Button cancelButton;
     private Button saveButton;
-    private Button rotateButton;
+    private Button reTakeButton;
     private Bitmap background;
     private ImageView imageView;
     private OverlayView overlayView;
@@ -58,17 +57,12 @@ public class CroppingActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         overlayView = findViewById(R.id.cropOverlayView);
-        cancelButton = findViewById(R.id.cancelButton);
-        cancelButton = findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(v -> {
+        reTakeButton = findViewById(R.id.reTakeButton);
+        reTakeButton.setOnClickListener(v -> {
             onBackPressed();
         });
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(v -> {
-
-        });
-        rotateButton = findViewById(R.id.rotateButton);
-        rotateButton.setOnClickListener(v -> {
 
         });
 

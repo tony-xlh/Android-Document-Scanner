@@ -126,7 +126,6 @@ public class CameraActivity extends AppCompatActivity {
                                         if (steady() == true) {
                                             Log.d("DDN","take photo");
                                             takePhoto(result, bitmap.getWidth(), bitmap.getHeight());
-                                            imageAnalysis.clearAnalyzer();
                                             taken = true;
                                         }else{
                                             previousResults.remove(0);
@@ -209,5 +208,17 @@ public class CameraActivity extends AppCompatActivity {
         } catch (DocumentNormalizerException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onResume(){
+        previousResults.clear();
+        taken = false;
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
     }
 }
