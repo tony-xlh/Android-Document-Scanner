@@ -39,8 +39,12 @@ public class CroppingActivity extends AppCompatActivity {
     private ImageView corner2;
     private ImageView corner3;
     private ImageView corner4;
+    private ImageView[] corners = new ImageView[4];
     private int mLastX;
     private int mLastY;
+    private Point[] points;
+    private int bitmapWidth;
+    private int bitmapHeight;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,60 +73,57 @@ public class CroppingActivity extends AppCompatActivity {
         corner2 = findViewById(R.id.corner2);
         corner3 = findViewById(R.id.corner3);
         corner4 = findViewById(R.id.corner4);
-
+        corners[0] = corner1;
+        corners[1] = corner2;
+        corners[2] = corner3;
+        corners[3] = corner4;
         imageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 //updateOverlayViewLayout();
             }
         });
-        setEvents();
+
+        bitmapWidth = getIntent().getIntExtra("bitmapWidth",720);
+        bitmapHeight = getIntent().getIntExtra("bitmapHeight",1280);
+        loadPoints();
         loadImage();
+        setEvents();
+    }
+
+    private void loadPoints(){
+        Parcelable[] parcelables = getIntent().getParcelableArrayExtra("points");
+        points = new Point[parcelables.length];
+        for (int i = 0; i < parcelables.length; i++) {
+            points[i] = (Point) parcelables[i];
+        }
     }
 
     private void loadImage(){
         try {
             Uri uri = Uri.parse(getIntent().getStringExtra("imageUri"));
-            Parcelable[] parcelables = getIntent().getParcelableArrayExtra("points");
-            Point[] points = new Point[parcelables.length];
-            for (int i = 0; i < parcelables.length; i++) {
-                points[i] = (Point) parcelables[i];
-            }
-
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
             imageView.setImageBitmap(bitmap);
             background = bitmap;
-            int bitmapWidth = getIntent().getIntExtra("bitmapWidth",720);
-            int bitmapHeight = getIntent().getIntExtra("bitmapHeight",1280);
-            drawOverlay(bitmapWidth,bitmapHeight,points);
-            updateCornersPosition(bitmapWidth,bitmapHeight,points);
+            drawOverlay();
+            updateCornersPosition();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void updateCornersPosition(int width,int height,Point[] pts){
+    private void updateCornersPosition(){
         DisplayMetrics metrics=new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int screenWidth=metrics.widthPixels;
         int screenHeight=metrics.heightPixels;
-        ImageView[] corners = new ImageView[4];
-        corners[0] = corner1;
-        corners[1] = corner2;
-        corners[2] = corner3;
-        corners[3] = corner4;
         for (int i = 0; i < 4; i++) {
-            corners[i].setX(pts[i].x*screenWidth/width-30);
-            corners[i].setY(pts[i].y*screenHeight/height-30);
+            corners[i].setX(points[i].x*screenWidth/bitmapWidth-30);
+            corners[i].setY(points[i].y*screenHeight/bitmapHeight-30);
         }
     }
 
     private void setEvents(){
-        ImageView[] corners = new ImageView[4];
-        corners[0] = corner1;
-        corners[1] = corner2;
-        corners[2] = corner3;
-        corners[3] = corner4;
         for (int i = 0; i < 4; i++) {
             corners[i].setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -148,10 +149,13 @@ public class CroppingActivity extends AppCompatActivity {
         }
     }
 
-    private void drawOverlay(int width,int height,Point[] pts){
-        Log.d("DDN","image width: "+width);
-        Log.d("DDN","image height: "+height);
-        overlayView.setPointsAndImageGeometry(pts,width,height);
+    private void updatePoints(){
+
+
+    }
+
+    private void drawOverlay(){
+        overlayView.setPointsAndImageGeometry(points,bitmapWidth,bitmapHeight);
     }
 
     private void updateOverlayViewLayout(){
