@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import com.dynamsoft.core.CoreException;
 import com.dynamsoft.core.Quadrilateral;
@@ -30,6 +32,22 @@ public class ViewerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewer);
+        RadioGroup filterRadioGroup = findViewById(R.id.filterRadioGroup);
+        filterRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.binaryRadioButton) {
+                    updateSettings(R.raw.binary_template);
+                }else if (checkedId == R.id.grayscaleRadioButton) {
+                    updateSettings(R.raw.gray_template);
+                }else{
+                    updateSettings(R.raw.color_template);
+                }
+                normalize();
+            }
+        });
+
+
         normalizedImageView = findViewById(R.id.normalizedImageView);
         try {
             ddn = new DocumentNormalizer();
@@ -37,7 +55,7 @@ public class ViewerActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         loadImageAndPoints();
-
+        normalize();
     }
 
     private void loadImageAndPoints(){
@@ -57,6 +75,10 @@ public class ViewerActivity extends AppCompatActivity {
             points[i].x = points[i].x*rawImage.getWidth()/bitmapWidth;
             points[i].y = points[i].y*rawImage.getHeight()/bitmapHeight;
         }
+
+    }
+
+    private void normalize(){
         Quadrilateral quad = new Quadrilateral();
         quad.points = points;
         try {
@@ -67,8 +89,12 @@ public class ViewerActivity extends AppCompatActivity {
         }
     }
 
-    private void updateSettings(){
-
+    private void updateSettings(int id) {
+        try {
+            ddn.initRuntimeSettingsFromString(readTemplate(id));
+        } catch (DocumentNormalizerException e) {
+            e.printStackTrace();
+        }
     }
 
     private String readTemplate(int id){

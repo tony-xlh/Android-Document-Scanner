@@ -41,38 +41,36 @@
 
     </LinearLayout>
 
-    <HorizontalScrollView
+    <RadioGroup
+        android:id="@+id/filterRadioGroup"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
+        <RadioButton
+            android:id="@+id/binaryRadioButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Binary" />
 
-            <RadioButton
-                android:id="@+id/binaryRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="Binary" />
+        <RadioButton
+            android:id="@+id/grayscaleRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grayscale" />
 
-            <RadioButton
-                android:id="@+id/grayscaleRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Grayscale" />
+        <RadioButton
+            android:id="@+id/colorRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Color" />
 
-            <RadioButton
-                android:id="@+id/colorRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Color" />
-        </LinearLayout>
-    </HorizontalScrollView>
+    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
