@@ -2,6 +2,7 @@ package com.dynamsoft.documentscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -63,7 +64,12 @@ public class CroppingActivity extends AppCompatActivity {
         });
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(v -> {
-
+            Intent intent = new Intent(this, ViewerActivity.class);
+            intent.putExtra("imageUri",getIntent().getStringExtra("imageUri"));
+            intent.putExtra("points",points);
+            intent.putExtra("bitmapWidth",bitmapWidth);
+            intent.putExtra("bitmapHeight",bitmapHeight);
+            startActivity(intent);
         });
 
         corner1 = findViewById(R.id.corner1);
