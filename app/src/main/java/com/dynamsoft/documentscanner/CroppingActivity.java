@@ -43,8 +43,11 @@ public class CroppingActivity extends AppCompatActivity {
     private int mLastX;
     private int mLastY;
     private Point[] points;
+    private int screenWidth;
+    private int screenHeight;
     private int bitmapWidth;
     private int bitmapHeight;
+    private int cornerWidth = 30;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +86,10 @@ public class CroppingActivity extends AppCompatActivity {
                 //updateOverlayViewLayout();
             }
         });
-
+        DisplayMetrics metrics=new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        screenWidth=metrics.widthPixels;
+        screenHeight=metrics.heightPixels;
         bitmapWidth = getIntent().getIntExtra("bitmapWidth",720);
         bitmapHeight = getIntent().getIntExtra("bitmapHeight",1280);
         loadPoints();
@@ -113,13 +119,9 @@ public class CroppingActivity extends AppCompatActivity {
     }
 
     private void updateCornersPosition(){
-        DisplayMetrics metrics=new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int screenWidth=metrics.widthPixels;
-        int screenHeight=metrics.heightPixels;
         for (int i = 0; i < 4; i++) {
-            corners[i].setX(points[i].x*screenWidth/bitmapWidth-30);
-            corners[i].setY(points[i].y*screenHeight/bitmapHeight-30);
+            corners[i].setX(points[i].x*screenWidth/bitmapWidth-cornerWidth);
+            corners[i].setY(points[i].y*screenHeight/bitmapHeight-cornerWidth);
         }
     }
 
@@ -139,6 +141,7 @@ public class CroppingActivity extends AppCompatActivity {
                         case MotionEvent.ACTION_MOVE:
                             view.setX(view.getX()+x);
                             view.setY(view.getY()+y);
+                            updatePointsAndRedraw();
                             break;
                         default:
                             break;
@@ -149,9 +152,12 @@ public class CroppingActivity extends AppCompatActivity {
         }
     }
 
-    private void updatePoints(){
-
-
+    private void updatePointsAndRedraw(){
+        for (int i = 0; i < 4; i++) {
+            points[i].x = (int) ((corners[i].getX()+cornerWidth)/screenWidth*bitmapWidth);
+            points[i].y = (int) ((corners[i].getY()+cornerWidth)/screenHeight*bitmapHeight);
+        }
+        drawOverlay();
     }
 
     private void drawOverlay(){
