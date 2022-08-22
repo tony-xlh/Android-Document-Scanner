@@ -12,7 +12,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -36,6 +39,8 @@ public class CroppingActivity extends AppCompatActivity {
     private ImageView corner2;
     private ImageView corner3;
     private ImageView corner4;
+    private int mLastX;
+    private int mLastY;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,12 +65,18 @@ public class CroppingActivity extends AppCompatActivity {
 
         });
 
+        corner1 = findViewById(R.id.corner1);
+        corner2 = findViewById(R.id.corner2);
+        corner3 = findViewById(R.id.corner3);
+        corner4 = findViewById(R.id.corner4);
+
         imageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 //updateOverlayViewLayout();
             }
         });
+        setEvents();
         loadImage();
     }
 
@@ -84,8 +95,56 @@ public class CroppingActivity extends AppCompatActivity {
             int bitmapWidth = getIntent().getIntExtra("bitmapWidth",720);
             int bitmapHeight = getIntent().getIntExtra("bitmapHeight",1280);
             drawOverlay(bitmapWidth,bitmapHeight,points);
+            updateCornersPosition(bitmapWidth,bitmapHeight,points);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void updateCornersPosition(int width,int height,Point[] pts){
+        DisplayMetrics metrics=new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int screenWidth=metrics.widthPixels;
+        int screenHeight=metrics.heightPixels;
+        ImageView[] corners = new ImageView[4];
+        corners[0] = corner1;
+        corners[1] = corner2;
+        corners[2] = corner3;
+        corners[3] = corner4;
+        for (int i = 0; i < 4; i++) {
+            corners[i].setX(pts[i].x*screenWidth/width-30);
+            corners[i].setY(pts[i].y*screenHeight/height-30);
+        }
+    }
+
+    private void setEvents(){
+        ImageView[] corners = new ImageView[4];
+        corners[0] = corner1;
+        corners[1] = corner2;
+        corners[2] = corner3;
+        corners[3] = corner4;
+        for (int i = 0; i < 4; i++) {
+            corners[i].setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent event) {
+                    Log.d("DDN",event.toString());
+                    int x = (int) event.getX();
+                    int y = (int) event.getY();
+                    switch (event.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            mLastX = x;
+                            mLastY = y;
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            view.setX(view.getX()+x);
+                            view.setY(view.getY()+y);
+                            break;
+                        default:
+                            break;
+                    }
+                    return true;
+                }
+            });
         }
     }
 

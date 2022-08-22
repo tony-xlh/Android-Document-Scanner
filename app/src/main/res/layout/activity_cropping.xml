@@ -29,15 +29,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-        <com.dynamsoft.documentscanner.OverlayView
-            android:id="@+id/cropOverlayView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"></com.dynamsoft.documentscanner.OverlayView>
-
         <ImageView
             android:id="@+id/corner1"
             android:layout_width="30dp"
@@ -69,6 +60,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/corner" />
+
+        <com.dynamsoft.documentscanner.OverlayView
+            android:id="@+id/cropOverlayView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></com.dynamsoft.documentscanner.OverlayView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
