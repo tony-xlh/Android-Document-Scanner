@@ -14,11 +14,14 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.dynamsoft.core.CoreException;
+import com.dynamsoft.core.EnumImagePixelFormat;
+import com.dynamsoft.core.ImageData;
 import com.dynamsoft.core.Quadrilateral;
 import com.dynamsoft.ddn.DocumentNormalizer;
 import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.dynamsoft.ddn.NormalizedImageResult;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -112,5 +115,16 @@ public class ViewerActivity extends AppCompatActivity {
         return "";
     }
 
-
+    private void convertBitmapToImageData(){
+        ImageData data = new ImageData();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        rawImage.compress(Bitmap.CompressFormat.JPEG,80,stream);
+        byte[] byteArray = stream.toByteArray();
+        data.format = EnumImagePixelFormat.IPF_RGB_888;
+        data.orientation = 0;
+        data.width = rawImage.getWidth();
+        data.height = rawImage.getHeight();
+        data.bytes = byteArray;
+        data.stride = 4 * ((rawImage.getWidth() * 3 + 31)/32);
+    }
 }
