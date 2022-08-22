@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ViewerActivity">
-
-    <ImageView
+    <com.jsibbold.zoomage.ZoomageView
         android:id="@+id/normalizedImageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -14,7 +13,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_launcher_background" />
+        android:src="@drawable/ic_launcher_background"
+        app:zoomage_restrictBounds="false"
+        app:zoomage_animateOnReset="true"
+        app:zoomage_autoResetMode="UNDER"
+        app:zoomage_autoCenter="true"
+        app:zoomage_zoomable="true"
+        app:zoomage_translatable="true"
+        app:zoomage_minScale="0.6"
+        app:zoomage_maxScale="8"
+        />
 
     <LinearLayout
         android:id="@+id/linearLayout2"

@@ -20,6 +20,7 @@ import com.dynamsoft.core.Quadrilateral;
 import com.dynamsoft.ddn.DocumentNormalizer;
 import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.dynamsoft.ddn.NormalizedImageResult;
+import com.jsibbold.zoomage.ZoomageView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import java.io.InputStream;
 
 public class ViewerActivity extends AppCompatActivity {
 
-    private ImageView normalizedImageView;
+    private ZoomageView normalizedImageView;
     private Point[] points;
     private Bitmap rawImage;
     private DocumentNormalizer ddn;
@@ -49,7 +50,6 @@ public class ViewerActivity extends AppCompatActivity {
                 normalize();
             }
         });
-
 
         normalizedImageView = findViewById(R.id.normalizedImageView);
         try {
