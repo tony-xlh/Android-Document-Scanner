@@ -1,8 +1,12 @@
 package com.dynamsoft.documentscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -12,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -42,6 +47,11 @@ public class ViewerActivity extends AppCompatActivity {
     private Bitmap normalized;
     private DocumentNormalizer ddn;
     private int rotation = 0;
+
+    private static final String[] WRITE_EXTERNAL_STORAGE_PERMISSION = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 10;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +69,11 @@ public class ViewerActivity extends AppCompatActivity {
         });
 
         saveImageButton.setOnClickListener(v -> {
-            saveImage(rawImage);
+            if (hasStoragePermission()) {
+                saveImage(rawImage);
+            }else{
+                requestPermission();
+            }
         });
 
         RadioGroup filterRadioGroup = findViewById(R.id.filterRadioGroup);
@@ -164,7 +178,6 @@ public class ViewerActivity extends AppCompatActivity {
         File file = new File(appDir, fileName);
         try {
             FileOutputStream fos = new FileOutputStream(file);
-
             if (rotation != 0) {
                 Matrix matrix  = new Matrix();
                 matrix.setRotate(rotation);
@@ -173,14 +186,43 @@ public class ViewerActivity extends AppCompatActivity {
             }else{
                 bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             }
-
             fos.flush();
             fos.close();
-            Toast.makeText(this,"File saved to "+file.getAbsolutePath(),Toast.LENGTH_SHORT);
+            Toast.makeText(this,"File saved to "+file.getAbsolutePath(),Toast.LENGTH_LONG);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private boolean hasStoragePermission() {
+        return ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(
+                this,
+                WRITE_EXTERNAL_STORAGE_PERMISSION,
+                WRITE_EXTERNAL_STORAGE_REQUEST_CODE
+        );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case WRITE_EXTERNAL_STORAGE_REQUEST_CODE:
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    saveImage(normalized);
+                } else {
+                    Toast.makeText(this, "Please grant the permission to write external storage.", Toast.LENGTH_SHORT).show();
+                }
         }
     }
 }
