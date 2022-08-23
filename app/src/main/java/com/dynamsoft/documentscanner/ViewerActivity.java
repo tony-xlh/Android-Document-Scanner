@@ -38,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 public class ViewerActivity extends AppCompatActivity {
 
@@ -125,7 +126,18 @@ public class ViewerActivity extends AppCompatActivity {
         Quadrilateral quad = new Quadrilateral();
         quad.points = points;
         try {
-            NormalizedImageResult result = ddn.normalize(rawImage,quad);
+            //NormalizedImageResult result = ddn.normalize(rawImage,quad);
+            int bytes = rawImage.getByteCount();
+            ByteBuffer buf = ByteBuffer.allocate(bytes);
+            rawImage.copyPixelsToBuffer(buf);
+            ImageData imageData = new ImageData();
+            imageData.bytes = buf.array();
+            imageData.width = rawImage.getWidth();
+            imageData.height = rawImage.getHeight();
+            imageData.stride = rawImage.getRowBytes();
+            imageData.format = EnumImagePixelFormat.IPF_ABGR_8888;
+
+            NormalizedImageResult result = ddn.normalize(imageData,quad);
             normalized = result.image.toBitmap();
             normalizedImageView.setImageBitmap(normalized);
         } catch (DocumentNormalizerException | CoreException e) {
