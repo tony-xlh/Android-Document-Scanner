@@ -70,7 +70,7 @@ public class ViewerActivity extends AppCompatActivity {
 
         saveImageButton.setOnClickListener(v -> {
             if (hasStoragePermission()) {
-                saveImage(rawImage);
+                saveImage(normalized);
             }else{
                 requestPermission();
             }
