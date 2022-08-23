@@ -2,17 +2,21 @@ package com.dynamsoft.documentscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.dynamsoft.core.CoreException;
 import com.dynamsoft.core.EnumImagePixelFormat;
@@ -24,6 +28,9 @@ import com.dynamsoft.ddn.NormalizedImageResult;
 import com.jsibbold.zoomage.ZoomageView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -32,13 +39,29 @@ public class ViewerActivity extends AppCompatActivity {
     private ZoomageView normalizedImageView;
     private Point[] points;
     private Bitmap rawImage;
+    private Bitmap normalized;
     private DocumentNormalizer ddn;
-    private Button rotateButton;
-    private Button saveImageButton;
+    private int rotation = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewer);
+
+        Button rotateButton = findViewById(R.id.rotateButton);
+        Button saveImageButton = findViewById(R.id.saveImageButton);
+
+        rotateButton.setOnClickListener(v -> {
+            rotation = rotation + 90;
+            if (rotation == 360) {
+                rotation = 0;
+            }
+            normalizedImageView.setRotation(rotation);
+        });
+
+        saveImageButton.setOnClickListener(v -> {
+            saveImage(rawImage);
+        });
+
         RadioGroup filterRadioGroup = findViewById(R.id.filterRadioGroup);
         filterRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -89,7 +112,8 @@ public class ViewerActivity extends AppCompatActivity {
         quad.points = points;
         try {
             NormalizedImageResult result = ddn.normalize(rawImage,quad);
-            normalizedImageView.setImageBitmap(result.image.toBitmap());
+            normalized = result.image.toBitmap();
+            normalizedImageView.setImageBitmap(normalized);
         } catch (DocumentNormalizerException | CoreException e) {
             e.printStackTrace();
         }
@@ -129,5 +153,34 @@ public class ViewerActivity extends AppCompatActivity {
         data.height = rawImage.getHeight();
         data.bytes = byteArray;
         data.stride = 4 * ((rawImage.getWidth() * 3 + 31)/32);
+    }
+
+    public void saveImage(Bitmap bmp) {
+        File appDir = new File(Environment.getExternalStorageDirectory(), "ddn");
+        if (!appDir.exists()) {
+            appDir.mkdir();
+        }
+        String fileName = System.currentTimeMillis() + ".jpg";
+        File file = new File(appDir, fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+
+            if (rotation != 0) {
+                Matrix matrix  = new Matrix();
+                matrix.setRotate(rotation);
+                Bitmap rotated = Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight(),matrix,false);
+                rotated.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            }else{
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            }
+
+            fos.flush();
+            fos.close();
+            Toast.makeText(this,"File saved to "+file.getAbsolutePath(),Toast.LENGTH_SHORT);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
