@@ -89,11 +89,11 @@
             android:text="Retake" />
 
         <Button
-            android:id="@+id/saveButton"
+            android:id="@+id/okayButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Save" />
+            android:text="Okay" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

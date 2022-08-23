@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -32,6 +33,8 @@ public class ViewerActivity extends AppCompatActivity {
     private Point[] points;
     private Bitmap rawImage;
     private DocumentNormalizer ddn;
+    private Button rotateButton;
+    private Button saveImageButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -4,10 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,7 +11,6 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -23,14 +18,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-
 public class CroppingActivity extends AppCompatActivity {
-    private Button saveButton;
+    private Button okayButton;
     private Button reTakeButton;
     private Bitmap background;
     private ImageView imageView;
@@ -62,8 +51,8 @@ public class CroppingActivity extends AppCompatActivity {
         reTakeButton.setOnClickListener(v -> {
             onBackPressed();
         });
-        saveButton = findViewById(R.id.saveButton);
-        saveButton.setOnClickListener(v -> {
+        okayButton = findViewById(R.id.okayButton);
+        okayButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, ViewerActivity.class);
             intent.putExtra("imageUri",getIntent().getStringExtra("imageUri"));
             intent.putExtra("points",points);
