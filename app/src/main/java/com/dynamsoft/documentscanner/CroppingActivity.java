@@ -3,6 +3,7 @@ package com.dynamsoft.documentscanner;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -36,7 +38,7 @@ public class CroppingActivity extends AppCompatActivity {
     private int screenHeight;
     private int bitmapWidth;
     private int bitmapHeight;
-    private int cornerWidth = 30;
+    private int cornerWidth = (int) dp2px(15);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,8 +111,34 @@ public class CroppingActivity extends AppCompatActivity {
 
     private void updateCornersPosition(){
         for (int i = 0; i < 4; i++) {
-            corners[i].setX(points[i].x*screenWidth/bitmapWidth-cornerWidth);
-            corners[i].setY(points[i].y*screenHeight/bitmapHeight-cornerWidth);
+            int offsetX = getOffsetX(i);
+            int offsetY = getOffsetY(i);
+            corners[i].setX(points[i].x*screenWidth/bitmapWidth+offsetX);
+            corners[i].setY(points[i].y*screenHeight/bitmapHeight+offsetY);
+        }
+    }
+
+    private int getOffsetX(int index) {
+        if (index == 0) {
+            return -cornerWidth;
+        }else if (index == 1){
+            return 0;
+        }else if (index == 2){
+            return 0;
+        }else{
+            return -cornerWidth;
+        }
+    }
+
+    private int getOffsetY(int index) {
+        if (index == 0) {
+            return -cornerWidth;
+        }else if (index == 1){
+            return -cornerWidth;
+        }else if (index == 2){
+            return 0;
+        }else{
+            return 0;
         }
     }
 
@@ -143,8 +171,10 @@ public class CroppingActivity extends AppCompatActivity {
 
     private void updatePointsAndRedraw(){
         for (int i = 0; i < 4; i++) {
-            points[i].x = (int) ((corners[i].getX()+cornerWidth)/screenWidth*bitmapWidth);
-            points[i].y = (int) ((corners[i].getY()+cornerWidth)/screenHeight*bitmapHeight);
+            int offsetX = getOffsetX(i);
+            int offsetY = getOffsetY(i);
+            points[i].x = (int) ((corners[i].getX()-offsetX)/screenWidth*bitmapWidth);
+            points[i].y = (int) ((corners[i].getY()-offsetY)/screenHeight*bitmapHeight);
         }
         drawOverlay();
     }
@@ -155,14 +185,13 @@ public class CroppingActivity extends AppCompatActivity {
 
     private void updateOverlayViewLayout(){
         Bitmap bm = background;
-        Log.d("DDN","image width: "+imageView.getWidth());
-        Log.d("DDN","image height: "+imageView.getHeight());
         double ratioView = ((double) imageView.getWidth())/imageView.getHeight();
         double ratioImage = ((double) bm.getWidth())/bm.getHeight();
         double offsetX = (ratioImage*bm.getWidth()-bm.getHeight())/2;
-        Log.d("DDN","ratioImage: "+ratioImage);
-        Log.d("DDN","offsetX: "+offsetX);
         overlayView.setX((float) offsetX);
     }
 
+    public float dp2px(float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
+    }
 }

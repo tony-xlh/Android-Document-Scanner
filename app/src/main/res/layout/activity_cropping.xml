@@ -31,32 +31,32 @@
 
         <ImageView
             android:id="@+id/corner1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/corner" />
 
         <ImageView
             android:id="@+id/corner2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/corner" />
 
         <ImageView
             android:id="@+id/corner3"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/corner" />
 
         <ImageView
             android:id="@+id/corner4"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/corner" />
