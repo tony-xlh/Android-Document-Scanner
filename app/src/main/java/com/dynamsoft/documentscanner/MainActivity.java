@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initDynamsoftLicense(){
-        LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMTAwMjI3NzYzLVRYbE5iMkpwYkdWUWNtOXFYMlJrYmciLCJvcmdhbml6YXRpb25JRCI6IjEwMDIyNzc2MyIsImNoZWNrQ29kZSI6MTM0ODY2MDUyMn0=", MainActivity.this, new LicenseVerificationListener() {
+        LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==", MainActivity.this, new LicenseVerificationListener() {
             @Override
             public void licenseVerificationCallback(boolean isSuccess, CoreException error) {
                 if(!isSuccess){
