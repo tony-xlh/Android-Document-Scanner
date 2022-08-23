@@ -188,7 +188,7 @@ public class ViewerActivity extends AppCompatActivity {
             }
             fos.flush();
             fos.close();
-            Toast.makeText(this,"File saved to "+file.getAbsolutePath(),Toast.LENGTH_LONG);
+            Toast.makeText(ViewerActivity.this,"File saved to "+file.getAbsolutePath(),Toast.LENGTH_LONG).show();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
