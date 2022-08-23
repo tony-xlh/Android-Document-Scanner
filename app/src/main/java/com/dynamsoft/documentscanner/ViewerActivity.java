@@ -136,7 +136,6 @@ public class ViewerActivity extends AppCompatActivity {
             imageData.height = rawImage.getHeight();
             imageData.stride = rawImage.getRowBytes();
             imageData.format = EnumImagePixelFormat.IPF_ABGR_8888;
-
             NormalizedImageResult result = ddn.normalize(imageData,quad);
             normalized = result.image.toBitmap();
             normalizedImageView.setImageBitmap(normalized);
