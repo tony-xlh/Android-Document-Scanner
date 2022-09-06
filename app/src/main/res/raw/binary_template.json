@@ -14,25 +14,7 @@
     {
       "Name":"NP-1",
       "ContentType": "CT_DOCUMENT",
-      "InteriorAngleRangeArray": [
-        {
-          "MinValue": 70,
-          "MaxValue": 110
-        }
-      ],
-      "QuadrilateralDetectionModes": [
-        {
-          "Mode": "QDM_GENERAL"
-        }
-      ],
-      "DeskewMode": {
-        "Mode": "DM_PERSPECTIVE_CORRECTION",
-        "ContentDirection": 0
-      },
-      "PageSize": [-1, -1],
-      "ColourMode": "ICM_BINARY",
-      "Brightness": 0,
-      "Contrast": 0
+      "ColourMode": "ICM_BINARY"
     }
   ]
 }
