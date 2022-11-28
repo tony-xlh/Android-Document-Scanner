@@ -47,7 +47,7 @@ public class CroppingActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         imageView = findViewById(R.id.imageView);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
         overlayView = findViewById(R.id.cropOverlayView);
         reTakeButton = findViewById(R.id.reTakeButton);
         reTakeButton.setOnClickListener(v -> {
