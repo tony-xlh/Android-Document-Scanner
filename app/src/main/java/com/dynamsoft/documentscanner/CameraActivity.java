@@ -163,7 +163,7 @@ public class CameraActivity extends AppCompatActivity {
     private Boolean steady(){
         float iou1 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(1).location.points);
         float iou2 = Utils.intersectionOverUnion(previousResults.get(1).location.points,previousResults.get(2).location.points);
-        float iou3 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(1).location.points);
+        float iou3 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(2).location.points);
         Log.d("DDN","iou1: "+iou1);
         Log.d("DDN","iou2: "+iou2);
         Log.d("DDN","iou3: "+iou3);
