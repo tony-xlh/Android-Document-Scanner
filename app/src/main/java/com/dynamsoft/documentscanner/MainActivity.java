@@ -12,10 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.dynamsoft.core.CoreException;
-import com.dynamsoft.core.LicenseManager;
-import com.dynamsoft.core.LicenseVerificationListener;
+import com.dynamsoft.license.LicenseManager;
 
 public class MainActivity extends AppCompatActivity {
     private Button startScanButton;
@@ -72,14 +69,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initDynamsoftLicense(){
-        LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==", MainActivity.this, new LicenseVerificationListener() {
-            @Override
-            public void licenseVerificationCallback(boolean isSuccess, CoreException error) {
-                if(!isSuccess){
-                    error.printStackTrace();
-                }else{
-                    Log.d("DDN","license valid");
-                }
+        LicenseManager.initLicense("DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==", this, (isSuccess, error) -> {
+            if (!isSuccess) {
+                Log.e("DDN", "InitLicense Error: " + error);
+            }else{
+                Log.d("DDN","license valid");
             }
         });
     }

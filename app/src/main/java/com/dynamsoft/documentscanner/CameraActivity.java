@@ -30,13 +30,11 @@ import android.view.Display;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.dynamsoft.core.CoreException;
-import com.dynamsoft.core.ImageData;
-import com.dynamsoft.core.LicenseManager;
-import com.dynamsoft.core.LicenseVerificationListener;
-import com.dynamsoft.core.Quadrilateral;
-import com.dynamsoft.ddn.DetectedQuadResult;
-import com.dynamsoft.ddn.DocumentNormalizer;
+import com.dynamsoft.core.basic_structures.CapturedResult;
+import com.dynamsoft.core.basic_structures.CapturedResultItem;
+import com.dynamsoft.cvr.CaptureVisionRouter;
+import com.dynamsoft.cvr.CaptureVisionRouterException;
+import com.dynamsoft.ddn.DetectedQuadResultItem;
 import com.dynamsoft.ddn.DocumentNormalizerException;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -53,10 +51,10 @@ public class CameraActivity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ExecutorService exec;
     private Camera camera;
-    private DocumentNormalizer ddn;
+    private CaptureVisionRouter cvr;
     private ImageCapture imageCapture;
     private Boolean taken = false;
-    private ArrayList<DetectedQuadResult> previousResults = new ArrayList<DetectedQuadResult>();
+    private ArrayList<DetectedQuadResultItem> previousResults = new ArrayList<DetectedQuadResultItem>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +78,7 @@ public class CameraActivity extends AppCompatActivity {
                 }
             }
         }, ContextCompat.getMainExecutor(this));
-        initDDN();
+        initCVR();
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -113,14 +111,14 @@ public class CameraActivity extends AppCompatActivity {
                 overlayView.setSrcImageWidth(bitmap.getWidth());
                 overlayView.setSrcImageHeight(bitmap.getHeight());
                 try {
-                    DetectedQuadResult[] results = ddn.detectQuad(bitmap);
-
+                    CapturedResult capturedResult = cvr.capture(bitmap,"DetectDocumentBoundaries_Default");
+                    CapturedResultItem[] results = capturedResult.getItems();
                     if (results != null) {
                         if (results.length>0) {
-                            DetectedQuadResult result = results[0];
-                            Log.d("DDN","confidence: "+result.confidenceAsDocumentBoundary);
-                            overlayView.setPoints(result.location.points);
-                            if (result.confidenceAsDocumentBoundary > 50) {
+                            DetectedQuadResultItem result = (DetectedQuadResultItem) results[0];
+                            Log.d("DDN","confidence: "+result.getConfidenceAsDocumentBoundary());
+                            overlayView.setPoints(result.getLocation().points);
+                            if (result.getConfidenceAsDocumentBoundary() > 50) {
                                 if (taken == false) {
                                     if (previousResults.size() == 3) {
                                         if (steady() == true) {
@@ -138,7 +136,7 @@ public class CameraActivity extends AppCompatActivity {
                             }
                         }
                     }
-                } catch (DocumentNormalizerException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 image.close();
@@ -161,9 +159,9 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private Boolean steady(){
-        float iou1 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(1).location.points);
-        float iou2 = Utils.intersectionOverUnion(previousResults.get(1).location.points,previousResults.get(2).location.points);
-        float iou3 = Utils.intersectionOverUnion(previousResults.get(0).location.points,previousResults.get(2).location.points);
+        float iou1 = Utils.intersectionOverUnion(previousResults.get(0).getLocation().points,previousResults.get(1).getLocation().points);
+        float iou2 = Utils.intersectionOverUnion(previousResults.get(1).getLocation().points,previousResults.get(2).getLocation().points);
+        float iou3 = Utils.intersectionOverUnion(previousResults.get(0).getLocation().points,previousResults.get(2).getLocation().points);
         Log.d("DDN","iou1: "+iou1);
         Log.d("DDN","iou2: "+iou2);
         Log.d("DDN","iou3: "+iou3);
@@ -174,7 +172,7 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    private void takePhoto(DetectedQuadResult result,int bitmapWidth,int bitmapHeight){
+    private void takePhoto(DetectedQuadResultItem result,int bitmapWidth,int bitmapHeight){
         File dir = getExternalCacheDir();
         File file = new File(dir, "photo.jpg");
         ImageCapture.OutputFileOptions outputFileOptions =
@@ -187,7 +185,7 @@ public class CameraActivity extends AppCompatActivity {
                         Log.d("DDN",outputFileResults.getSavedUri().toString());
                         Intent intent = new Intent(CameraActivity.this, CroppingActivity.class);
                         intent.putExtra("imageUri",outputFileResults.getSavedUri().toString());
-                        intent.putExtra("points",result.location.points);
+                        intent.putExtra("points",result.getLocation().points);
                         intent.putExtra("bitmapWidth",bitmapWidth);
                         intent.putExtra("bitmapHeight",bitmapHeight);
                         startActivity(intent);
@@ -202,10 +200,11 @@ public class CameraActivity extends AppCompatActivity {
         );
     }
 
-    private void initDDN(){
+    private void initCVR(){
+        cvr = new CaptureVisionRouter(CameraActivity.this);
         try {
-            ddn = new DocumentNormalizer();
-        } catch (DocumentNormalizerException e) {
+            cvr.initSettings("{\"CaptureVisionTemplates\": [{\"Name\": \"Default\"},{\"Name\": \"DetectDocumentBoundaries_Default\",\"ImageROIProcessingNameArray\": [\"roi-detect-document-boundaries\"]},{\"Name\": \"DetectAndNormalizeDocument_Default\",\"ImageROIProcessingNameArray\": [\"roi-detect-and-normalize-document\"]},{\"Name\": \"NormalizeDocument_Binary\",\"ImageROIProcessingNameArray\": [\"roi-normalize-document-binary\"]},  {\"Name\": \"NormalizeDocument_Gray\",\"ImageROIProcessingNameArray\": [\"roi-normalize-document-gray\"]},  {\"Name\": \"NormalizeDocument_Color\",\"ImageROIProcessingNameArray\": [\"roi-normalize-document-color\"]}],\"TargetROIDefOptions\": [{\"Name\": \"roi-detect-document-boundaries\",\"TaskSettingNameArray\": [\"task-detect-document-boundaries\"]},{\"Name\": \"roi-detect-and-normalize-document\",\"TaskSettingNameArray\": [\"task-detect-and-normalize-document\"]},{\"Name\": \"roi-normalize-document-binary\",\"TaskSettingNameArray\": [\"task-normalize-document-binary\"]},  {\"Name\": \"roi-normalize-document-gray\",\"TaskSettingNameArray\": [\"task-normalize-document-gray\"]},  {\"Name\": \"roi-normalize-document-color\",\"TaskSettingNameArray\": [\"task-normalize-document-color\"]}],\"DocumentNormalizerTaskSettingOptions\": [{\"Name\": \"task-detect-and-normalize-document\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-detect-and-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-detect-and-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-detect-and-normalize\"}]},{\"Name\": \"task-detect-document-boundaries\",\"TerminateSetting\": {\"Section\": \"ST_DOCUMENT_DETECTION\"},\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-detect\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-detect\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-detect\"}]},{\"Name\": \"task-normalize-document-binary\",\"StartSection\": \"ST_DOCUMENT_NORMALIZATION\",   \"ColourMode\": \"ICM_BINARY\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-normalize\"}]},  {\"Name\": \"task-normalize-document-gray\",   \"ColourMode\": \"ICM_GRAYSCALE\",\"StartSection\": \"ST_DOCUMENT_NORMALIZATION\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-normalize\"}]},  {\"Name\": \"task-normalize-document-color\",   \"ColourMode\": \"ICM_COLOUR\",\"StartSection\": \"ST_DOCUMENT_NORMALIZATION\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-normalize\"}]}],\"ImageParameterOptions\": [{\"Name\": \"ip-detect-and-normalize\",\"BinarizationModes\": [{\"Mode\": \"BM_LOCAL_BLOCK\",\"BlockSizeX\": 0,\"BlockSizeY\": 0,\"EnableFillBinaryVacancy\": 0}],\"TextDetectionMode\": {\"Mode\": \"TTDM_WORD\",\"Direction\": \"HORIZONTAL\",\"Sensitivity\": 7}},{\"Name\": \"ip-detect\",\"BinarizationModes\": [{\"Mode\": \"BM_LOCAL_BLOCK\",\"BlockSizeX\": 0,\"BlockSizeY\": 0,\"EnableFillBinaryVacancy\": 0,\"ThresholdCompensation\" : 7}],\"TextDetectionMode\": {\"Mode\": \"TTDM_WORD\",\"Direction\": \"HORIZONTAL\",\"Sensitivity\": 7},\"ScaleDownThreshold\" : 512},{\"Name\": \"ip-normalize\",\"BinarizationModes\": [{\"Mode\": \"BM_LOCAL_BLOCK\",\"BlockSizeX\": 0,\"BlockSizeY\": 0,\"EnableFillBinaryVacancy\": 0}],\"TextDetectionMode\": {\"Mode\": \"TTDM_WORD\",\"Direction\": \"HORIZONTAL\",\"Sensitivity\": 7}}]}");
+        } catch (CaptureVisionRouterException e) {
             e.printStackTrace();
         }
     }

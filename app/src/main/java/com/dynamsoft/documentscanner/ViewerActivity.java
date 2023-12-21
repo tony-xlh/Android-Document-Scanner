@@ -23,13 +23,12 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.dynamsoft.core.CoreException;
-import com.dynamsoft.core.EnumImagePixelFormat;
-import com.dynamsoft.core.ImageData;
-import com.dynamsoft.core.Quadrilateral;
-import com.dynamsoft.ddn.DocumentNormalizer;
-import com.dynamsoft.ddn.DocumentNormalizerException;
-import com.dynamsoft.ddn.NormalizedImageResult;
+import com.dynamsoft.core.basic_structures.CapturedResult;
+import com.dynamsoft.core.basic_structures.Quadrilateral;
+import com.dynamsoft.cvr.CaptureVisionRouter;
+import com.dynamsoft.cvr.CaptureVisionRouterException;
+import com.dynamsoft.cvr.SimplifiedCaptureVisionSettings;
+import com.dynamsoft.ddn.NormalizedImageResultItem;
 import com.jsibbold.zoomage.ZoomageView;
 
 import java.io.ByteArrayOutputStream;
@@ -46,8 +45,9 @@ public class ViewerActivity extends AppCompatActivity {
     private Point[] points;
     private Bitmap rawImage;
     private Bitmap normalized;
-    private DocumentNormalizer ddn;
+    private CaptureVisionRouter cvr;
     private int rotation = 0;
+    private String templateName = "NormalizeDocument_Binary";
 
     private static final String[] WRITE_EXTERNAL_STORAGE_PERMISSION = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 10;
@@ -82,20 +82,22 @@ public class ViewerActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.binaryRadioButton) {
-                    updateSettings(R.raw.binary_template);
+                    templateName = "NormalizeDocument_Binary";
                 }else if (checkedId == R.id.grayscaleRadioButton) {
-                    updateSettings(R.raw.gray_template);
+                    templateName = "NormalizeDocument_Gray";
                 }else{
-                    updateSettings(R.raw.color_template);
+                    templateName = "NormalizeDocument_Color";
                 }
                 normalize();
             }
         });
 
         normalizedImageView = findViewById(R.id.normalizedImageView);
+
+        cvr = new CaptureVisionRouter(ViewerActivity.this);
         try {
-            ddn = new DocumentNormalizer();
-        } catch (DocumentNormalizerException e) {
+            cvr.initSettings("{\"CaptureVisionTemplates\": [{\"Name\": \"Default\"},{\"Name\": \"DetectDocumentBoundaries_Default\",\"ImageROIProcessingNameArray\": [\"roi-detect-document-boundaries\"]},{\"Name\": \"DetectAndNormalizeDocument_Default\",\"ImageROIProcessingNameArray\": [\"roi-detect-and-normalize-document\"]},{\"Name\": \"NormalizeDocument_Binary\",\"ImageROIProcessingNameArray\": [\"roi-normalize-document-binary\"]},  {\"Name\": \"NormalizeDocument_Gray\",\"ImageROIProcessingNameArray\": [\"roi-normalize-document-gray\"]},  {\"Name\": \"NormalizeDocument_Color\",\"ImageROIProcessingNameArray\": [\"roi-normalize-document-color\"]}],\"TargetROIDefOptions\": [{\"Name\": \"roi-detect-document-boundaries\",\"TaskSettingNameArray\": [\"task-detect-document-boundaries\"]},{\"Name\": \"roi-detect-and-normalize-document\",\"TaskSettingNameArray\": [\"task-detect-and-normalize-document\"]},{\"Name\": \"roi-normalize-document-binary\",\"TaskSettingNameArray\": [\"task-normalize-document-binary\"]},  {\"Name\": \"roi-normalize-document-gray\",\"TaskSettingNameArray\": [\"task-normalize-document-gray\"]},  {\"Name\": \"roi-normalize-document-color\",\"TaskSettingNameArray\": [\"task-normalize-document-color\"]}],\"DocumentNormalizerTaskSettingOptions\": [{\"Name\": \"task-detect-and-normalize-document\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-detect-and-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-detect-and-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-detect-and-normalize\"}]},{\"Name\": \"task-detect-document-boundaries\",\"TerminateSetting\": {\"Section\": \"ST_DOCUMENT_DETECTION\"},\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-detect\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-detect\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-detect\"}]},{\"Name\": \"task-normalize-document-binary\",\"StartSection\": \"ST_DOCUMENT_NORMALIZATION\",   \"ColourMode\": \"ICM_BINARY\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-normalize\"}]},  {\"Name\": \"task-normalize-document-gray\",   \"ColourMode\": \"ICM_GRAYSCALE\",\"StartSection\": \"ST_DOCUMENT_NORMALIZATION\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-normalize\"}]},  {\"Name\": \"task-normalize-document-color\",   \"ColourMode\": \"ICM_COLOUR\",\"StartSection\": \"ST_DOCUMENT_NORMALIZATION\",\"SectionImageParameterArray\": [{\"Section\": \"ST_REGION_PREDETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_DETECTION\",\"ImageParameterName\": \"ip-normalize\"},{\"Section\": \"ST_DOCUMENT_NORMALIZATION\",\"ImageParameterName\": \"ip-normalize\"}]}],\"ImageParameterOptions\": [{\"Name\": \"ip-detect-and-normalize\",\"BinarizationModes\": [{\"Mode\": \"BM_LOCAL_BLOCK\",\"BlockSizeX\": 0,\"BlockSizeY\": 0,\"EnableFillBinaryVacancy\": 0}],\"TextDetectionMode\": {\"Mode\": \"TTDM_WORD\",\"Direction\": \"HORIZONTAL\",\"Sensitivity\": 7}},{\"Name\": \"ip-detect\",\"BinarizationModes\": [{\"Mode\": \"BM_LOCAL_BLOCK\",\"BlockSizeX\": 0,\"BlockSizeY\": 0,\"EnableFillBinaryVacancy\": 0,\"ThresholdCompensation\" : 7}],\"TextDetectionMode\": {\"Mode\": \"TTDM_WORD\",\"Direction\": \"HORIZONTAL\",\"Sensitivity\": 7},\"ScaleDownThreshold\" : 512},{\"Name\": \"ip-normalize\",\"BinarizationModes\": [{\"Mode\": \"BM_LOCAL_BLOCK\",\"BlockSizeX\": 0,\"BlockSizeY\": 0,\"EnableFillBinaryVacancy\": 0}],\"TextDetectionMode\": {\"Mode\": \"TTDM_WORD\",\"Direction\": \"HORIZONTAL\",\"Sensitivity\": 7}}]}");
+        } catch (CaptureVisionRouterException e) {
             e.printStackTrace();
         }
         loadImageAndPoints();
@@ -123,65 +125,25 @@ public class ViewerActivity extends AppCompatActivity {
     }
 
     private void normalize(){
-        Quadrilateral quad = new Quadrilateral();
-        quad.points = points;
         try {
-            //NormalizedImageResult result = ddn.normalize(rawImage,quad);
-            int bytes = rawImage.getByteCount();
-            ByteBuffer buf = ByteBuffer.allocate(bytes);
-            rawImage.copyPixelsToBuffer(buf);
-            ImageData imageData = new ImageData();
-            imageData.bytes = buf.array();
-            imageData.width = rawImage.getWidth();
-            imageData.height = rawImage.getHeight();
-            imageData.stride = rawImage.getRowBytes();
-            imageData.format = EnumImagePixelFormat.IPF_ABGR_8888;
-            NormalizedImageResult result = ddn.normalize(imageData,quad);
-            normalized = result.image.toBitmap();
+            Quadrilateral quad = new Quadrilateral();
+            quad.points = points;
+            SimplifiedCaptureVisionSettings settings = cvr.getSimplifiedSettings(templateName);
+            settings.roi = quad;
+            settings.roiMeasuredInPercentage = false;
+            cvr.updateSettings(templateName,settings);
+            CapturedResult capturedResult = cvr.capture(rawImage,templateName);
+            NormalizedImageResultItem result = (NormalizedImageResultItem) capturedResult.getItems()[0];
+            normalized = result.getImageData().toBitmap();
             normalizedImageView.setImageBitmap(normalized);
-        } catch (DocumentNormalizerException | CoreException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void updateSettings(int id) {
-        try {
-            ddn.initRuntimeSettingsFromString(readTemplate(id));
-        } catch (DocumentNormalizerException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String readTemplate(int id){
-        Resources resources = this.getResources();
-        InputStream is=resources.openRawResource(id);
-        byte[] buffer;
-        try {
-            buffer = new byte[is.available()];
-            is.read(buffer);
-            String content = new String(buffer);
-            return content;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    private void convertBitmapToImageData(){
-        ImageData data = new ImageData();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        rawImage.compress(Bitmap.CompressFormat.JPEG,80,stream);
-        byte[] byteArray = stream.toByteArray();
-        data.format = EnumImagePixelFormat.IPF_RGB_888;
-        data.orientation = 0;
-        data.width = rawImage.getWidth();
-        data.height = rawImage.getHeight();
-        data.bytes = byteArray;
-        data.stride = 4 * ((rawImage.getWidth() * 3 + 31)/32);
-    }
 
     public void saveImage(Bitmap bmp) {
-        File appDir = new File(Environment.getExternalStorageDirectory(), "ddn");
+        File appDir = new File(this.getApplicationContext().getExternalFilesDir(""), "ddn");
         if (!appDir.exists()) {
             appDir.mkdir();
         }
