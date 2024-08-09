@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -19,6 +22,10 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class CroppingActivity extends AppCompatActivity {
     private Button okayButton;
@@ -99,7 +106,9 @@ public class CroppingActivity extends AppCompatActivity {
     private void loadImage(){
         try {
             Uri uri = Uri.parse(getIntent().getStringExtra("imageUri"));
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
+            InputStream inp = getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inp);
+            bitmap = rotatedImageBasedOnExif(bitmap,uri.getPath());
             imageView.setImageBitmap(bitmap);
             background = bitmap;
             drawOverlay();
@@ -107,6 +116,43 @@ public class CroppingActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private Bitmap rotatedImageBasedOnExif(Bitmap bitmap, String path) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            ExifInterface exif = null;
+            try {
+                exif = new ExifInterface(path);
+            } catch (IOException e) {
+                return bitmap;
+            }
+            int rotate = 0;
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
+            Log.d("DDN","orientation: "+orientation);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+            }
+            Matrix matrix = new Matrix();
+            matrix.postRotate(rotate);
+            Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                    bitmap.getHeight(), matrix, true);
+            try (FileOutputStream out = new FileOutputStream(path)) {
+                rotated.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return rotated;
+        }
+        return bitmap;
     }
 
     private void updateCornersPosition(){
