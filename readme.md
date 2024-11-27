@@ -2,7 +2,7 @@
 
 Android Document Scanner using [Dynamsoft Document Normalizer](https://www.dynamsoft.com/document-normalizer/docs/introduction/).
 
-You can [apply for a trial license](https://www.dynamsoft.com/customer/license/trialLicense?product=ddn) and update [this line](https://github.com/xulihang/Android-Document-Scanner/blob/78ba04916bb395ae82ddd586bd6ab0c74def39ab/app/src/main/java/com/dynamsoft/documentscanner/MainActivity.java#L75) to use Dynamsoft Document Normalizer.
+You can [apply for a trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform) and update [this line](https://github.com/xulihang/Android-Document-Scanner/blob/78ba04916bb395ae82ddd586bd6ab0c74def39ab/app/src/main/java/com/dynamsoft/documentscanner/MainActivity.java#L75) to use Dynamsoft Document Normalizer.
 
 
 ### Document Scanning Process
